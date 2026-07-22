@@ -21,7 +21,6 @@ REGIOES = {
 def extrair_musicas(url, cookies):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
         'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7'
     }
     response = requests.get(url, headers=headers, cookies=cookies, timeout=15)
@@ -30,25 +29,30 @@ def extrair_musicas(url, cookies):
     soup = BeautifulSoup(response.text, 'html.parser')
     musicas_atuais = {}
     
-    # Mapeia especificamente a lista ordenada de músicas do Cifra Club pelo id 'js-sng_list'
-    lista_top = soup.find('ol', id='js-sng_list') or soup.find('ol', class_=lambda c: c and ('top' in c or 'gridMusicTop' in c))
+    # Busca a lista principal de mais acessadas pelo ID ou classe do Cifra Club
+    lista_top = soup.find('ol', id='js-sng_list') or soup.find('ol', class_=lambda c: c and 'top' in c) or soup.find('ol')
     
     if not lista_top:
         return musicas_atuais
         
     itens = lista_top.find_all('li')
-    for rank, item in enumerate(itens, start=1):
-        tag_nome = item.find('strong', class_=lambda c: c and 'top-txt_primary' in c) or item.find(['strong', 'b'])
-        tag_artista = item.find('span', class_='top-txt_secondary') or item.find('span')
+    rank = 1
+    for item in itens:
         tag_a = item.find('a')
         
-        nome = tag_nome.text.strip() if tag_nome else "Desconhecido"
-        artista = tag_artista.text.strip() if tag_artista else "Desconhecido"
+        # Mapeamento exato da estrutura DOM do Cifra Club
+        tag_nome = item.find(class_='top-txt_primary__verified') or item.find(['strong', 'b'])
+        tag_artista = item.find(class_='top-txt_secondary')
         
-        # Garante que não inserimos itens vazios ou desalinhados
-        if nome == "Desconhecido" and not tag_a:
+        if not tag_nome or not tag_artista:
             continue
-
+            
+        nome = tag_nome.text.strip()
+        artista = tag_artista.text.strip()
+        
+        if not nome or not artista:
+            continue
+        
         # Captura o link relativo e transforma em URL absoluta funcional
         href = tag_a['href'] if tag_a and tag_a.has_attr('href') else ""
         link_absoluto = urljoin(url, href) if href else ""
@@ -60,6 +64,7 @@ def extrair_musicas(url, cookies):
             "artista": artista,
             "url": link_absoluto
         }
+        rank += 1
             
     return musicas_atuais
 
