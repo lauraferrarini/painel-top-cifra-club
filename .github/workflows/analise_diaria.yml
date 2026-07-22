@@ -1,0 +1,50 @@
+name: Analisador Diário de Músicas - Cifra Club
+
+on:
+  schedule:
+    # Roda todos os dias às 11:00 UTC (08:00 no Horário de Brasília)
+    - cron: '0 11 * * *'
+  workflow_dispatch: # Permite o botão de início manual
+
+jobs:
+  analisar_dados:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    # ⚡ FORÇA O SERVIDOR DO GITHUB A USAR O HORÁRIO DO BRASIL
+    env:
+      TZ: "America/Sao_Paulo"
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar o Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Instalar dependências
+        run: pip install requests beautifulsoup4
+
+      - name: Rodar script de análise
+        run: python analisador.py
+
+      - name: Salvar alterações no GitHub (Git Puro)
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          # Mapeia todas as subpastas e os arquivos dinâmicos (*.md e *.json)
+          git add historico_dados/ historico_relatorios/ relatorio_diario_*.md dados_dashboard_*.json || true
+          
+          if ! git diff --cached --quiet; then
+            git commit -m "📊 Histórico, relatórios e dados do painel Cifra Club updated"
+            git pull origin main --rebase
+            git push origin main
+          else
+            echo "Nenhuma mudança nos dados estruturados detectada hoje."
+          fi
