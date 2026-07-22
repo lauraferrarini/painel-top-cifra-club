@@ -19,28 +19,36 @@ REGIOES = {
 }
 
 def extrair_musicas(url, cookies):
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7'
+    }
     response = requests.get(url, headers=headers, cookies=cookies, timeout=15)
     response.raise_for_status()
     
     soup = BeautifulSoup(response.text, 'html.parser')
     musicas_atuais = {}
     
-    # Busca a lista principal de mais acessadas do Cifra Club
-    lista_top = soup.find('ol', class_=lambda c: c and 'list' in c) or soup.find('ol')
+    # Mapeia especificamente a lista ordenada de músicas do Cifra Club pelo id 'js-sng_list'
+    lista_top = soup.find('ol', id='js-sng_list') or soup.find('ol', class_=lambda c: c and ('top' in c or 'gridMusicTop' in c))
     
     if not lista_top:
         return musicas_atuais
         
     itens = lista_top.find_all('li')
     for rank, item in enumerate(itens, start=1):
-        tag_nome = item.find(['b', 'strong'])
-        tag_artista = item.find('span')
+        tag_nome = item.find('strong', class_=lambda c: c and 'top-txt_primary' in c) or item.find(['strong', 'b'])
+        tag_artista = item.find('span', class_='top-txt_secondary') or item.find('span')
         tag_a = item.find('a')
         
         nome = tag_nome.text.strip() if tag_nome else "Desconhecido"
         artista = tag_artista.text.strip() if tag_artista else "Desconhecido"
         
+        # Garante que não inserimos itens vazios ou desalinhados
+        if nome == "Desconhecido" and not tag_a:
+            continue
+
         # Captura o link relativo e transforma em URL absoluta funcional
         href = tag_a['href'] if tag_a and tag_a.has_attr('href') else ""
         link_absoluto = urljoin(url, href) if href else ""
