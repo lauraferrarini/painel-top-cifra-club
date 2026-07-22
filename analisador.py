@@ -7,6 +7,7 @@ import sys
 import traceback
 from datetime import datetime
 from urllib.parse import urljoin
+from playwright.sync_api import sync_playwright
 
 # Configurações Gerais
 PASTA_DADOS = "historico_dados"
@@ -19,18 +20,53 @@ REGIOES = {
 }
 
 def extrair_musicas(url, cookies):
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7'
-    }
-    response = requests.get(url, headers=headers, cookies=cookies, timeout=15)
-    response.raise_for_status()
-    
-    soup = BeautifulSoup(response.text, 'html.parser')
     musicas_atuais = {}
     
-    # Busca a lista principal de mais acessadas pelo ID ou classe do Cifra Club
-    lista_top = soup.find('ol', id='js-sng_list') or soup.find('ol', class_=lambda c: c and 'top' in c) or soup.find('ol')
+    print("⏳ Abrindo navegador e carregando o Top 1000 do Cifra Club...")
+    
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        context = browser.new_context(
+            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            locale='pt-BR'
+        )
+        page = context.new_page()
+        page.goto(url, wait_until="domcontentloaded", timeout=60000)
+        
+        page.wait_for_selector("#js-sng_list", timeout=15000)
+        
+        # Loop inteligente para clicar no botão "Mostrar mais" até atingir 1000 músicas
+        tentativas_sem_mudanca = 0
+        while True:
+            qtd_atual = page.locator("#js-sng_list > li").count()
+            if qtd_atual >= 1000:
+                print(f"🎯 Meta atingida: {qtd_atual} músicas carregadas!")
+                break
+                
+            btn_mais = page.locator("#js-top_more")
+            if btn_mais.is_visible():
+                btn_mais.click()
+                try:
+                    # Aguarda a lista expandir além da quantidade anterior
+                    page.wait_for_function(
+                        f"document.querySelectorAll('#js-sng_list > li').length > {qtd_atual}",
+                        timeout=3000
+                    )
+                    tentativas_sem_mudanca = 0
+                except Exception:
+                    tentativas_sem_mudanca += 1
+                    if tentativas_sem_mudanca >= 3:
+                        print(f"ℹ️ Carregamento finalizado com {qtd_atual} itens na lista.")
+                        break
+            else:
+                print(f"ℹ️ Botão 'Mostrar mais' não visível. Total carregado: {qtd_atual}")
+                break
+
+        html_completo = page.content()
+        browser.close()
+
+    soup = BeautifulSoup(html_completo, 'html.parser')
+    lista_top = soup.find('ol', id='js-sng_list') or soup.find('ol', class_=lambda c: c and 'top' in c)
     
     if not lista_top:
         return musicas_atuais
@@ -39,8 +75,6 @@ def extrair_musicas(url, cookies):
     rank = 1
     for item in itens:
         tag_a = item.find('a')
-        
-        # Mapeamento exato da estrutura DOM do Cifra Club
         tag_nome = item.find(class_='top-txt_primary__verified') or item.find(['strong', 'b'])
         tag_artista = item.find(class_='top-txt_secondary')
         
@@ -53,7 +87,6 @@ def extrair_musicas(url, cookies):
         if not nome or not artista:
             continue
         
-        # Captura o link relativo e transforma em URL absoluta funcional
         href = tag_a['href'] if tag_a and tag_a.has_attr('href') else ""
         link_absoluto = urljoin(url, href) if href else ""
         
@@ -66,6 +99,7 @@ def extrair_musicas(url, cookies):
         }
         rank += 1
             
+    print(f"✅ Sucesso: {len(musicas_atuais)} músicas extraídas com precisão!")
     return musicas_atuais
 
 def buscar_dados_anteriores(regiao):
@@ -100,7 +134,6 @@ def atualizar_dados_dashboard(regiao):
         for chave, info in dados_dia.items():
             if chave not in historico_global:
                 historico_global[chave] = {}
-            # Preserva a URL estável da música dentro da estrutura estruturada do Dashboard
             if "url" in info and "url" not in historico_global[chave]:
                 historico_global[chave]["url"] = info["url"]
             historico_global[chave][data_str] = info["posicao"]
@@ -116,7 +149,6 @@ def atualizar_dados_dashboard(regiao):
 def processar_regiao(regiao, config):
     print(f"🌍 Coletando dados: {config['nome']} ({regiao})...")
     
-    # Garante as subpastas específicas
     pasta_dados_regiao = os.path.join(PASTA_DADOS, regiao)
     pasta_relatorios_regiao = os.path.join(PASTA_RELATORIOS, regiao)
     os.makedirs(pasta_dados_regiao, exist_ok=True)
@@ -214,15 +246,12 @@ def processar_regiao(regiao, config):
         else:
             conteudo_md += "- Nenhuma música inédita detectada hoje.\n"
 
-    # Salva os relatórios específicos
     with open(os.path.join(pasta_relatorios_regiao, f"relatorio_{data_hoje_iso}.md"), 'w', encoding='utf-8') as f:
         f.write(conteudo_md)
         
-    # Relatório raiz específico
     with open(f"relatorio_diario_{regiao}.md", 'w', encoding='utf-8') as f:
         f.write(conteudo_md)
         
-    # Salva o JSON na subpasta correspondente
     with open(os.path.join(pasta_dados_regiao, f"dados_{data_hoje_iso}.json"), 'w', encoding='utf-8') as f:
         json.dump(atuais, f, ensure_ascii=False, indent=4)
         
