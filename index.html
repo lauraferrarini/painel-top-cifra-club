@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Evolução Musical - Cifra Club</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #d8df00;
+            --text-main: #1a1a1a;
+            --text-muted: #666;
+            --bg-body: #f4f4f4;
+            --white: #ffffff;
+            --border-light: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+            font-size: 11px;
+            background-color: var(--bg-body);
+            margin: 0;
+            padding: 30px;
+            color: var(--text-main);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: var(--white);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+
+        header h1 { font-size: 22px; margin: 0 0 5px 0; font-weight: 700; }
+        p.subtitle { font-size: 11px; color: var(--text-muted); margin: 0 0 20px 0; }
+
+        /* CARDS DE RESUMO */
+        .kpi-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .kpi-card {
+            padding: 12px 15px;
+            border-radius: 6px;
+            border: 1px solid var(--border-light);
+            text-align: left;
+        }
+        .kpi-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 5px; }
+        .kpi-value { font-size: 20px; font-weight: 800; margin: 0; }
+        
+        .kpi-absurda { background-color: #fadbd8; color: #c0392b; border-color: #f5b7b1; }
+        .kpi-grandes { background-color: #f3e5f5; color: #7b1fa2; border-color: #e1bee7; }
+        .kpi-moderadas { background-color: #e3f2fd; color: #1976d2; border-color: #bbdefb; }
+        .kpi-novas { background-color: #eafaf1; color: #27ae60; border-color: #d4efdf; }
+
+        /* FILTROS POR CHECKBOX */
+        .filter-checkbox-container {
+            background-color: #f9f9f9; 
+            padding: 12px 15px; 
+            border-radius: 4px;
+            border: 1px solid var(--border-light); 
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+        }
+        .filter-checkbox-container .filter-title {
+            font-weight: 700; text-transform: uppercase; font-size: 9px; color: var(--text-muted); letter-spacing: 0.5px;
+        }
+        .filter-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            font-size: 11px;
+        }
+        .filter-label input[type="checkbox"] {
+            cursor: pointer;
+            margin: 0;
+            width: 14px;
+            height: 14px;
+        }
+
+        /* ⚡ ENGENHARIA DO TOOLTIP INSTANTÂNEO EM CSS PURO */
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            margin-left: -12px;
+        }
+        .tooltip-icon {
+            color: var(--text-muted);
+            font-weight: bold;
+            font-size: 12px;
+            transition: color 0.15s;
+        }
+        .tooltip-icon:hover {
+            color: #000;
+        }
+        .tooltip-box {
+            visibility: hidden;
+            width: 240px;
+            background-color: rgba(26, 26, 26, 0.92);
+            color: #fff;
+            text-align: left;
+            border-radius: 4px;
+            padding: 8px 10px;
+            position: absolute;
+            z-index: 1000;
+            bottom: 135%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.15s ease, visibility 0.15s ease;
+            font-size: 10px;
+            font-weight: 500;
+            line-height: 1.4;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            pointer-events: none;
+            white-space: normal;
+        }
+        .tooltip-box::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: rgba(26, 26, 26, 0.92) transparent transparent transparent;
+        }
+        .tooltip-container:hover .tooltip-box {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* BOX DO GRÁFICO */
+        .chart-box {
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            background-color: #fdfdfd;
+            padding: 15px;
+            margin-bottom: 30px;
+            height: 320px;
+            position: relative;
+        }
+        .no-data { text-align: center; color: var(--text-muted); font-style: italic; padding-top: 130px; }
+
+        .period-selector { 
+            font-size: 11px; 
+            margin-bottom: 12px; 
+            text-align: right;
+            display: none; 
+        }
+        .period-selector span { margin-left: 15px; color: var(--text-muted); cursor: pointer; font-weight: 500; transition: color 0.2s; }
+        .period-selector span:hover { color: #000; }
+        .period-selector .current { color: #000; font-weight: 800; text-decoration: underline; }
+
+        /* BUSCA RÁPIDA E DROPDOWN DE SELEÇÃO */
+        .search-container { margin-bottom: 25px; display: flex; gap: 10px; align-items: center; }
+        .search-input { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 11px; font-family: inherit; width: 250px; }
+        .search-input:focus { border-color: #999; outline: none; }
+        
+        .search-matches-dropdown {
+            display: none;
+            position: absolute;
+            background: #ffffff;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            max-height: 180px;
+            overflow-y: auto;
+            width: 250px;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .search-match-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f5f5f5;
+            text-align: left;
+            color: var(--text-main);
+        }
+        .search-match-item:hover {
+            background-color: #fcfde7;
+        }
+        .search-match-item:last-child {
+            border-bottom: none;
+        }
+
+        /* ESTILIZAÇÃO DA TABELA CORRIDA ÚNICA */
+        .table-container { width: 100%; border: 1px solid var(--border-light); border-radius: 4px; overflow: hidden; background: var(--white); }
+        table { width: 100%; border-collapse: collapse; }
+        th { 
+            color: #666; font-weight: 600; text-transform: uppercase; font-size: 9px; letter-spacing: 0.5px; 
+            padding: 10px; border: 1px solid var(--border-light); background: #fafafa; text-align: center;
+        }
+        td { padding: 9px 10px; border: 1px solid var(--border-light); text-align: center; vertical-align: middle; }
+        td.text-left { text-align: left !important; }
+
+        .clickable-row { cursor: pointer; transition: background 0.15s; }
+        .clickable-row:hover { background-color: #fcfde7 !important; }
+        .clickable-row.active-track { background-color: #f9fbc5; font-weight: 600; }
+
+        .badge-pos { background: #1a1a1a; color: #fff; padding: 2px 5px; border-radius: 3px; font-weight: 600; font-size: 10px; }
+        
+        #error-banner { display: none; background-color: #fadbd8; color: #c0392b; border: 1px solid #f5b7b1; padding: 15px; margin-bottom: 20px; font-weight: bold; border-radius: 4px; }
+        
+        /* Estilo sutil para o hiperlink do título */
+        .track-hyperlink {
+            color: inherit;
+            text-decoration: none;
+            border-bottom: 1px dashed #999;
+            transition: color 0.15s;
+        }
+        .track-hyperlink:hover {
+            color: #000;
+            border-bottom-style: solid;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="error-banner"></div>
+
+    <header>
+        <h1 id="report-date">Relatório Diário Top 1000 Cifra Club</h1>
+        <p class="subtitle">Acompanhamento contínuo do ranking e comportamento histórico das faixas. Atualiza diariamente às 08h00 BRT.</p>
+    </header>
+
+    <div class="kpi-container" id="kpi-wrapper">
+        <div class="kpi-card kpi-absurda"><div class="kpi-title">🚨 Explosões (+400)</div><div class="kpi-value" id="count-absurda">0</div></div>
+        <div class="kpi-card kpi-grandes"><div class="kpi-title">🔥 Grandes Saltos</div><div class="kpi-value" id="count-grandes">0</div></div>
+        <div class="kpi-card kpi-moderadas"><div class="kpi-title">📈 Subidas Significativas</div><div class="kpi-value" id="count-moderadas">0</div></div>
+        <div class="kpi-card kpi-novas"><div class="kpi-title">🚀 Novas Entradas</div><div class="kpi-value" id="count-novas">0</div></div>
+    </div>
+
+    <div class="filter-checkbox-container">
+        <span class="filter-title">Filtrar por Estado:</span>
+        <label class="filter-label" style="color: #000; font-weight: 800;"><input type="checkbox" id="chk-todas" checked onchange="aoClicarTodas()"> Todas</label>
+        <label class="filter-label"><input type="checkbox" id="chk-absurda" onchange="aoClicarIndividual()"> 🚨 Explosões</label>
+        <label class="filter-label"><input type="checkbox" id="chk-grandes" onchange="aoClicarIndividual()"> 🔥 Grandes Saltos</label>
+        <label class="filter-label"><input type="checkbox" id="chk-moderadas" onchange="aoClicarIndividual()"> 📈 Subidas Significativas</label>
+        <label class="filter-label"><input type="checkbox" id="chk-pequenas" onchange="aoClicarIndividual()"> 🌱 Pequenas Subidas</label>
+        <label class="filter-label"><input type="checkbox" id="chk-novas" onchange="aoClicarIndividual()"> 🚀 Novas Entradas</label>
+        
+        <span style="color: var(--border-light); margin: 0 2px;">|</span>
+        
+        <label class="filter-label" style="font-weight: 600; color: var(--text-main);">
+            <input type="checkbox" id="chk-fds" checked onchange="processarEMontarTabelaCorrida()"> Considerar fim de semana
+        </label>
+        <div class="tooltip-container">
+            <span class="tooltip-icon">ⓘ</span>
+            <div class="tooltip-box">Quando desativado, as movimentações de segunda-feira serão calculadas comparando o ranking atual com o de sexta-feira, ignorando as oscilações de sábado e domingo.</div>
+        </div>
+    </div>
+
+    <div class="chart-box">
+        <div style="display: flex; flex-direction: column; width: 100%; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+                <div id="chart-dynamic-title" style="display: none; font-size: 13px; font-weight: 700; max-width: 65%; word-break: break-word; line-height: 1.3; margin-left: 45px;"></div>
+                <div class="period-selector" id="menu-periodo" style="margin-bottom: 0; white-space: nowrap;">
+                    <span class="current" onclick="filtrarPeriodo(0, this)">Tudo</span>
+                    <span onclick="filtrarPeriodo(7, this)">1 Semana</span>
+                    <span onclick="filtrarPeriodo(28, this)">4 Semanas</span>
+                    <span onclick="filtrarPeriodo(90, this)">3 Meses</span>
+                    <span onclick="filtrarPeriodo(180, this)">6 Meses</span>
+                </div>
+            </div>
+            <div id="cross-region-presence" style="display: none; font-size: 11px; margin-top: 4px; margin-left: 45px; color: var(--text-muted); font-weight: 500;"></div>
+        </div>
+
+        <div id="canvas-container-wrapper" style="position: relative; height: calc(100% - 45px); width: 100%;">
+            <canvas id="historicoChart" style="display:none;"></canvas>
+            <div id="msg-inicial" class="no-data">📊 Selecione uma música na listagem corrida abaixo para analisar o histórico de posições.</div>
+        </div>
+    </div>
+
+    <div class="search-container">
+        <span style="font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 9px;">Busca Direta:</span>
+        <div style="position: relative; display: inline-block;">
+            <input type="text" id="musica-input" class="search-input" placeholder="Procurar outra faixa do histórico...">
+            <div id="search-matches" class="search-matches-dropdown"></div>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 70px;">Posição</th>
+                    <th>Título da Música</th>
+                    <th>Artista</th>
+                </tr>
+            </thead>
+            <tbody id="tbody-corrido">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let dadosGlobais = null;
+    let chartInstance = null;
+    let faixaSelecionadaAtualmente = null;
+    let diasFiltroAtivo = 0; 
+    let regiaoAtiva = 'cc';
+    const categoriesLista = ['absurda', 'grandes', 'moderadas', 'pequenas', 'novas'];
+
+    const nomesRegioes = {
+        'cc': 'Cifra Club'
+    };
+
+    if (!window.todosDadosRegioes) window.todosDadosRegioes = {};
+    const listaRegioes = ['cc'];
+
+    function carregarDados(regiao) {
+        regiaoAtiva = regiao;
+
+        if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+        faixaSelecionadaAtualmente = null;
+        document.getElementById('msg-inicial').style.display = 'block';
+        document.getElementById('menu-periodo').style.display = 'none';
+        document.getElementById('chart-dynamic-title').style.display = 'none';
+        document.getElementById('chart-dynamic-title').innerHTML = '';
+        document.getElementById('cross-region-presence').style.display = 'none';
+        document.getElementById('cross-region-presence').innerHTML = '';
+        document.getElementById('historicoChart').style.display = 'none';
+        document.getElementById('musica-input').value = '';
+        document.getElementById('search-matches').innerHTML = '';
+        document.getElementById('search-matches').style.display = 'none';
+        document.getElementById('error-banner').style.display = 'none';
+        
+        document.querySelectorAll('.persistent-tooltip').forEach(el => el.remove());
+        const svgOverlay = document.getElementById('popups-svg-overlay');
+        if (svgOverlay) svgOverlay.innerHTML = '';
+        
+        document.getElementById('chk-todas').checked = true;
+        categoriesLista.forEach(cat => document.getElementById(`chk-${cat}`).checked = false);
+
+        // Reseta o seletor de fim de semana para o estado padrão ativado
+        document.getElementById('chk-fds').checked = true;
+
+        diasFiltroAtivo = 0;
+        document.querySelectorAll('.period-selector span').forEach(el => el.classList.remove('current'));
+        const btnTudo = document.querySelector('.period-selector span[onclick^="filtrarPeriodo(0"]');
+        if (btnTudo) btnTudo.classList.add('current');
+
+        Promise.all(listaRegioes.map(r => {
+            if (window.todosDadosRegioes[r]) return Promise.resolve(window.todosDadosRegioes[r]);
+            return fetch(`dados_dashboard_${r}.json`)
+                .then(res => res.ok ? res.json() : null)
+                .then(jsonData => {
+                    if (jsonData) window.todosDadosRegioes[r] = jsonData;
+                    return jsonData;
+                })
+                .catch(() => null);
+        })).then(() => {
+            dadosGlobais = window.todosDadosRegioes[regiao];
+            if (!dadosGlobais) throw new Error(`Arquivo 'dados_dashboard_${regiao}.json' ausente.`);
+            if (!dadosGlobais.datas || dadosGlobais.datas.length === 0) return;
+
+            processarEMontarTabelaCorrida();
+            inicializarMecanismoBusca();
+        }).catch(err => {
+            const banner = document.getElementById('error-banner');
+            banner.style.display = 'block';
+            banner.innerHTML = `⚠️ Falha de inicialização: ${err.message}`;
+            document.getElementById('tbody-corrido').innerHTML = '';
+        });
+    }
+
+    function processarEMontarTabelaCorrida() {
+        const datas = dadosGlobais.datas;
+        const hoje = datas[datas.length - 1];
+        let ontem = datas.length > 1 ? datas[datas.length - 2] : null;
+
+        // ⚡ AUDITORIA DE FIM DE SEMANA NA SEGUNDA-FEIRA: Puxa os dados de sexta se desmarcado
+        const considerarFds = document.getElementById('chk-fds').checked;
+        if (!considerarFds && hoje) {
+            const partesHoje = hoje.split('-');
+            const dataHojeObj = new Date(partesHoje[0], partesHoje[1] - 1, partesHoje[2]);
+            if (dataHojeObj.getDay() === 1) { // 1 = Segunda-feira
+                for (let idx = datas.length - 2; idx >= 0; idx--) {
+                    const dStr = datas[idx];
+                    const p = dStr.split('-');
+                    const dCheck = new Date(p[0], p[1] - 1, p[2]);
+                    if (dCheck.getDay() === 5) { // 5 = Sexta-feira
+                        ontem = dStr;
+                        break;
+                    }
+                }
+            }
+        }
+
+        document.getElementById('report-date').innerText = `Relatório Diário Top 1000 Cifra Club — ${hoje.split('-').reverse().join('/')}`;
+
+        let listaGeral = [];
+        let cAbsurda = 0, cGrandes = 0, cModeradas = 0, cNovas = 0;
+
+        Object.entries(dadosGlobais.musicas).forEach(([nomeChave, historico]) => {
+            if (!historico[hoje]) return; 
+
+            let posAtual = historico[hoje];
+            let item = { nome: nomeChave, atual: posAtual, estado: 'normal', emojiHTML: '', url: historico.url || '#' };
+
+            // ⚡ COMPORTAMENTO DE DUAS TAGS CORRIGIDO: Omitida a tag de pequenas subidas (<100) para novidades
+            if (!ontem || !historico[ontem]) {
+                item.estado = 'novas';
+                item.emojiHTML = ' <span style="font-weight: normal; color: #27ae60; margin-left: 6px;">🚀 Novidade</span>';
+                cNovas++;
+
+                let ganhoSimulado = 1000 - posAtual;
+                if (ganhoSimulado > 0) {
+                    if (ganhoSimulado > 400) { item.estado += ' absurda'; item.emojiHTML += ` <span style="font-weight: normal; color: #c0392b; margin-left: 6px;">🚨 +${ganhoSimulado}</span>`; cAbsurda++; }
+                    else if (ganhoSimulado > 200) { item.estado += ' grandes'; item.emojiHTML += ` <span style="font-weight: normal; color: #7b1fa2; margin-left: 6px;">🔥 +${ganhoSimulado}</span>`; cGrandes++; }
+                    else if (ganhoSimulado >= 100) { item.estado += ' moderadas'; item.emojiHTML += ` <span style="font-weight: normal; color: #1976d2; margin-left: 6px;">📈 +${ganhoSimulado}</span>`; cModeradas++; }
+                }
+            } else {
+                let posAnterior = historico[ontem];
+                let ganho = posAnterior - posAtual;
+
+                if (ganho > 0) {
+                    if (ganho > 400) { item.estado = 'absurda'; item.emojiHTML = ` <span style="font-weight: normal; color: #c0392b; margin-left: 6px;">🚨 +${ganho}</span>`; cAbsurda++; }
+                    else if (ganho > 200) { item.estado = 'grandes'; item.emojiHTML = ` <span style="font-weight: normal; color: #7b1fa2; margin-left: 6px;">🔥 +${ganho}</span>`; cGrandes++; }
+                    else if (ganho >= 100) { item.estado = 'moderadas'; item.emojiHTML = ` <span style="font-weight: normal; color: #1976d2; margin-left: 6px;">📈 +${ganho}</span>`; cModeradas++; }
+                    else if (ganho > 2) { item.estado = 'pequenas'; item.emojiHTML = ` <span style="font-weight: normal; color: #27ae60; margin-left: 6px;">🌱 +${ganho}</span>`; }
+                }
+            }
+            listaGeral.push(item);
+        });
+
+        listaGeral.sort((a, b) => a.atual - b.atual);
+
+        document.getElementById('count-absurda').innerText = cAbsurda;
+        document.getElementById('count-grandes').innerText = cGrandes;
+        document.getElementById('count-moderadas').innerText = cModeradas;
+        document.getElementById('count-novas').innerText = cNovas;
+
+        let tbody = document.getElementById('tbody-corrido');
+        tbody.innerHTML = '';
+
+        listaGeral.forEach(item => {
+            let nomeEscapado = item.nome.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            
+            let lastHyphenIdx = item.nome.lastIndexOf("-");
+            let tituloMusica = "Desconhecido";
+            let artistaMusica = "Desconhecido";
+
+            if (lastHyphenIdx !== -1) {
+                tituloMusica = item.nome.substring(0, lastHyphenIdx).trim();
+                artistaMusica = item.nome.substring(lastHyphenIdx + 1).trim();
+                
+                if (tituloMusica.endsWith(" -")) {
+                    tituloMusica = tituloMusica.substring(0, tituloMusica.length - 2).trim();
+                }
+            } else {
+                tituloMusica = item.nome;
+            }
+
+            let tr = document.createElement('tr');
+            tr.className = "clickable-row";
+            tr.setAttribute('data-categoria', item.estado);
+            tr.setAttribute('data-fullname', item.nome);
+            
+            tr.onclick = function(e) { 
+                selecionarFaixa(item.nome, this); 
+                if (e.target.tagName === 'TD' || e.target.tagName === 'TR') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            };
+
+            let linkHTML = (item.url && item.url !== '#')
+                ? `<a href="${item.url}" target="_blank" class="track-hyperlink" onclick="event.stopPropagation();">${tituloMusica}</a>`
+                : `<span>${tituloMusica}</span>`;
+
+            // ⚡ AJUSTE DE ALINHAMENTO: Modificado para float: right para mandar o jornalzinho pro extremo direito da célula
+            let newsSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(item.nome)}&tbm=nws`;
+            let newsIconHTML = ` <a href="${newsSearchUrl}" target="_blank" title="Pesquisar notícias" onclick="event.stopPropagation();" style="text-decoration: none; float: right;">📰</a>`;
+
+            tr.innerHTML = `
+                <td><span class="badge-pos">${item.atual}º</span></td>
+                <td class="text-left" style="font-weight: 600; color: #000;">
+                    ${linkHTML}${item.emojiHTML}${newsIconHTML}
+                </td>
+                <td class="text-left" style="color: #555;">${artistaMusica}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        aplicarFiltrosNaTela();
+    }
+
+    function inicializarMecanismoBusca() {
+        if (window.buscaInicializada) return;
+        window.buscaInitialized = true;
+
+        const inputBusca = document.getElementById('musica-input');
+        const containerMatches = document.getElementById('search-matches');
+
+        inputBusca.addEventListener('input', function(e) {
+            let valorInput = e.target.value.toLowerCase().trim();
+            containerMatches.innerHTML = '';
+
+            if (!valorInput) {
+                containerMatches.style.display = 'none';
+                return;
+            }
+
+            let chavesGlobais = Object.keys(dadosGlobais.musicas);
+            let filtradas = chavesGlobais.filter(m => m.toLowerCase().includes(valorInput));
+
+            if (filtradas.length > 0) {
+                containerMatches.style.display = 'block';
+                filtradas.slice(0, 30).forEach(faixaNome => {
+                    let itemDiv = document.createElement('div');
+                    itemDiv.className = 'search-match-item';
+                    itemDiv.innerText = faixaNome;
+                    
+                    itemDiv.onclick = function() {
+                        inputBusca.value = faixaNome;
+                        containerMatches.style.display = 'none';
+                        
+                        let seletorLinha = document.querySelector(`#tbody-corrido .clickable-row[data-fullname="${faixaNome.replace(/"/g, '\\"')}"]`);
+                        selecionarFaixa(faixaNome, seletorLinha);
+                    };
+                    containerMatches.appendChild(itemDiv);
+                });
+            } else {
+                containerMatches.style.display = 'none';
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!inputBusca.contains(e.target)) {
+                containerMatches.style.display = 'none';
+            }
+        });
+    }
+
+    function aoClicarTodas() {
+        if (document.getElementById('chk-todas').checked) {
+            categoriesLista.forEach(cat => {
+                document.getElementById(`chk-${cat}`).checked = false;
+            });
+        }
+        aplicarFiltrosNaTela();
+    }
+
+    function aoClicarIndividual() {
+        document.getElementById('chk-todas').checked = false;
+        aplicarFiltrosNaTela();
+    }
+
+    // ⚡ SUPORTE A MÚLTIPLAS CATEGORIAS (Mapeamento de strings espaciais para o filtro reativo)
+    function aplicarFiltrosNaTela() {
+        const todasAsMusicas = document.getElementById('chk-todas').checked;
+        const rows = document.querySelectorAll('#tbody-corrido .clickable-row');
+
+        rows.forEach(row => {
+            if (todasAsMusicas) {
+                row.style.display = "";
+            } else {
+                const cat = row.getAttribute('data-categoria');
+                if (cat === 'normal') {
+                    row.style.display = "none";
+                } else {
+                    const cats = cat.split(' ');
+                    let boxMarcado = false;
+                    cats.forEach(c => {
+                        const el = document.getElementById(`chk-${c}`);
+                        if (el && el.checked) {
+                            boxMarcado = true;
+                        }
+                    });
+                    row.style.display = boxMarcado ? "" : "none";
+                }
+            }
+        });
+    }
+
+    function selecionarFaixa(nomeMusica, elementoLinha) {
+        faixaSelecionadaAtualmente = nomeMusica;
+        document.querySelectorAll('.clickable-row').forEach(el => el.classList.remove('active-track'));
+        
+        if(elementoLinha) {
+            elementoLinha.classList.add('active-track');
+        }
+
+        document.getElementById('msg-inicial').style.display = 'none';
+        document.getElementById('menu-periodo').style.display = 'block';
+        document.getElementById('historicoChart').style.display = 'block';
+        
+        const trackData = dadosGlobais.musicas[faixaSelecionadaAtualmente];
+        const trackUrl = trackData ? (trackData.url || '#') : '#';
+        
+        let lastHyphenIdx = faixaSelecionadaAtualmente.lastIndexOf("-");
+        let tituloClean = lastHyphenIdx !== -1 ? faixaSelecionadaAtualmente.substring(0, lastHyphenIdx).trim() : faixaSelecionadaAtualmente;
+        if (tituloClean.endsWith(" -")) tituloClean = tituloClean.substring(0, tituloClean.length - 2).trim();
+        let artistaClean = lastHyphenIdx !== -1 ? faixaSelecionadaAtualmente.substring(lastHyphenIdx + 1).trim() : "Desconhecido";
+
+        let dynamicLinkHTML = (trackUrl && trackUrl !== '#')
+            ? `<a href="${trackUrl}" target="_blank" class="track-hyperlink">${tituloClean}</a>`
+            : `<span>${tituloClean}</span>`;
+
+        const titleBox = document.getElementById('chart-dynamic-title');
+        titleBox.style.display = 'block';
+        titleBox.innerHTML = `${dynamicLinkHTML} <span style="color: var(--text-muted); font-size: 11px; font-weight: 500;">— ${artistaClean}</span>`;
+
+        gerarGrafico();
+    }
+
+    function criarPopupPersistente(date, position, x, y) {
+        const container = document.getElementById('canvas-container-wrapper');
+        
+        let svgOverlay = document.getElementById('popups-svg-overlay');
+        if (!svgOverlay) {
+            svgOverlay = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svgOverlay.id = 'popups-svg-overlay';
+            svgOverlay.style.position = 'absolute';
+            svgOverlay.style.top = '0';
+            svgOverlay.style.left = '0';
+            svgOverlay.style.width = '100%';
+            svgOverlay.style.height = '100%';
+            svgOverlay.style.pointerEvents = 'none';
+            svgOverlay.style.zIndex = '99';
+            container.appendChild(svgOverlay);
+        }
+
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute('x1', x);
+        line.setAttribute('y1', y);
+        line.setAttribute('x2', x + 8);
+        line.setAttribute('y2', y - 25);
+        line.setAttribute('stroke', 'rgba(26, 26, 26, 0.4)');
+        line.setAttribute('stroke-width', '1.2');
+        line.setAttribute('stroke-dasharray', '2,2');
+        svgOverlay.appendChild(line);
+
+        const popup = document.createElement('div');
+        popup.className = 'persistent-tooltip';
+        
+        popup.style.position = 'absolute';
+        popup.style.left = (x + 8) + 'px';
+        popup.style.top = (y - 25) + 'px';
+        popup.style.backgroundColor = 'rgba(26, 26, 26, 0.85)';
+        popup.style.color = '#fff';
+        popup.style.padding = '6px 10px';
+        popup.style.borderRadius = '4px';
+        popup.style.fontSize = '10px';
+        popup.style.fontFamily = "'Inter', sans-serif";
+        popup.style.zIndex = '100';
+        popup.style.boxShadow = '0 2px 6px rgba(0,0,0,0.15)';
+        popup.style.pointerEvents = 'auto';
+        popup.style.cursor = 'move';
+        popup.style.userSelect = 'none';
+        
+        popup.innerHTML = `
+            <span class="close-btn" style="color: #d8df00; font-weight: 800; cursor: pointer; float: right; margin-left: 12px; font-size: 11px; line-height: 1;">×</span>
+            <div style="font-weight: 600; pointer-events: none;">${date}</div>
+            <div style="margin-top: 2px; pointer-events: none;">Posição: <span style="color: #d8df00; font-weight: 700;">${position}º</span></div>
+        `;
+        
+        container.appendChild(popup);
+
+        const atualizarCoordenadasLinha = (left, top) => {
+            line.setAttribute('x2', left + 25);
+            line.setAttribute('y2', top + 15);
+        };
+        atualizarCoordenadasLinha(x + 8, y - 25);
+
+        popup.querySelector('.close-btn').onclick = function(e) {
+            e.stopPropagation();
+            line.remove();
+            popup.remove();
+        };
+
+        let isDragging = false;
+        let startX, startY, initialLeft, initialTop;
+
+        popup.addEventListener('mousedown', function(e) {
+            if (e.target.classList.contains('close-btn')) return;
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            initialLeft = parseFloat(popup.style.left);
+            initialTop = parseFloat(popup.style.top);
+            popup.style.zIndex = '101'; 
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            
+            const currentLeft = initialLeft + dx;
+            const currentTop = initialTop + dy;
+            
+            popup.style.left = currentLeft + 'px';
+            popup.style.top = currentTop + 'px';
+            
+            atualizarCoordenadasLinha(currentLeft, currentTop);
+        });
+
+        document.addEventListener('mouseup', function() {
+            if (isDragging) {
+                isDragging = false;
+                popup.style.zIndex = '100';
+            }
+        });
+    }
+
+    function filtrarPeriodo(dias, elementoClicado) {
+        diasFiltroAtivo = dias;
+        document.querySelectorAll('.period-selector span').forEach(el => el.classList.remove('current'));
+        elementoClicado.classList.add('current');
+        if (faixaSelecionadaAtualmente) gerarGrafico();
+    }
+
+    function gerarGrafico() {
+        let datas = dadosGlobais.datas;
+        const historicoPosis = dadosGlobais.musicas[faixaSelecionadaAtualmente];
+        let pontos = datas.map(data => historicoPosis[data] || null);
+
+        if (diasFiltroAtivo > 0) {
+            datas = datas.slice(-diasFiltroAtivo);
+            pontos = pontos.slice(-diasFiltroAtivo);
+        }
+
+        document.querySelectorAll('.persistent-tooltip').forEach(el => el.remove());
+        const svgOverlay = document.getElementById('popups-svg-overlay');
+        if (svgOverlay) svgOverlay.innerHTML = '';
+
+        if (chartInstance) { chartInstance.destroy(); }
+
+        const ctx = document.getElementById('historicoChart').getContext('2d');
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: datas.map(d => d.split('-').reverse().join('/')),
+                datasets: [{
+                    label: `Histórico de Posição`,
+                    data: pontos,
+                    clip: false, 
+                    borderColor: '#1a1a1a',
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#d8df00',
+                    pointBorderColor: '#1a1a1a',
+                    pointBorderWidth: 1.5,
+                    pointRadius: 4,
+                    spanGaps: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                onClick: function(e, elements) {
+                    if (elements.length > 0) {
+                        const element = elements[0];
+                        const datasetIndex = element.datasetIndex;
+                        const index = element.index;
+                        
+                        const label = e.chart.data.labels[index];
+                        const value = e.chart.data.datasets[datasetIndex].data[index];
+                        
+                        if (value === null) return;
+
+                        const position = element.element;
+                        criarPopupPersistente(label, value, position.x, position.y);
+                    }
+                },
+                scales: {
+                    y: {
+                        reverse: true,
+                        min: 0,
+                        max: 1000,
+                        grid: { color: '#e0e0e0' },
+                        ticks: { 
+                            stepSize: 100,
+                            callback: function(value) { 
+                                if (value === 0) return '1º';
+                                return value + 'º'; 
+                            }
+                        },
+                        title: { display: true, text: 'POSIÇÃO (TOP 1000)', font: { size: 9, weight: 700 } }
+                    },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    carregarDados('cc');
+</script>
+</body>
+</html>
