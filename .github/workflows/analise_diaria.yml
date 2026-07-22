@@ -27,8 +27,10 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Instalar dependências
-        run: pip install requests beautifulsoup4
+      - name: Instalar dependências e Playwright
+        run: |
+          pip install requests beautifulsoup4 playwright
+          playwright install chromium --with-deps
 
       - name: Rodar script de análise
         run: python analisador.py
