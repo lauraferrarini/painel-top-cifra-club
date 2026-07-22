@@ -1,0 +1,542 @@
+{
+    "Ah, Jesus / Coração Igual Ao Teu - Julliany Souza": {
+        "posicao": 1,
+        "nome": "Ah, Jesus / Coração Igual Ao Teu",
+        "artista": "Julliany Souza",
+        "url": "https://www.cifraclub.com.br/julliany-souza/ah-jesus-coracao-igual-ao-teu-2-2/"
+    },
+    "Wonderwall - Oasis": {
+        "posicao": 2,
+        "nome": "Wonderwall",
+        "artista": "Oasis",
+        "url": "https://www.cifraclub.com.br/oasis/wonderwall/"
+    },
+    "Tudo É Perda - Felipe Rodrigues": {
+        "posicao": 3,
+        "nome": "Tudo É Perda",
+        "artista": "Felipe Rodrigues",
+        "url": "https://www.cifraclub.com.br/felipe-rodrigues/tudo-e-perda/"
+    },
+    "Sublime - Florianópolis House Of Prayer (fhop music)": {
+        "posicao": 4,
+        "nome": "Sublime",
+        "artista": "Florianópolis House Of Prayer (fhop music)",
+        "url": "https://www.cifraclub.com.br/florianopolis-house-of-prayer/sublime/"
+    },
+    "Bondade de Deus - Isaías Saad": {
+        "posicao": 5,
+        "nome": "Bondade de Deus",
+        "artista": "Isaías Saad",
+        "url": "https://www.cifraclub.com.br/isaias-saad/bondade-de-deus/"
+    },
+    "Me Ama - Diante do Trono": {
+        "posicao": 6,
+        "nome": "Me Ama",
+        "artista": "Diante do Trono",
+        "url": "https://www.cifraclub.com.br/diante-do-trono/me-ama-/"
+    },
+    "Quem É Esse? - Julliany Souza": {
+        "posicao": 7,
+        "nome": "Quem É Esse?",
+        "artista": "Julliany Souza",
+        "url": "https://www.cifraclub.com.br/julliany-souza/quem-e-esse/"
+    },
+    "Tempo Perdido - Legião Urbana": {
+        "posicao": 8,
+        "nome": "Tempo Perdido",
+        "artista": "Legião Urbana",
+        "url": "https://www.cifraclub.com.br/legiao-urbana/tempo-perdido/"
+    },
+    "Tu És / Águas Purificadoras (Pot-pourri) - Florianópolis House Of Prayer (fhop music)": {
+        "posicao": 9,
+        "nome": "Tu És / Águas Purificadoras (Pot-pourri)",
+        "artista": "Florianópolis House Of Prayer (fhop music)",
+        "url": "https://www.cifraclub.com.br/florianopolis-house-of-prayer/tu-es-aguas-purificadoras/"
+    },
+    "Irmão da Lua, Amigo Das Estrelas - Zezé Di Camargo & Luciano": {
+        "posicao": 10,
+        "nome": "Irmão da Lua, Amigo Das Estrelas",
+        "artista": "Zezé Di Camargo & Luciano",
+        "url": "https://www.cifraclub.com.br/zeze-di-camargo-e-luciano/irmao-da-lua-amigo-das-estrelas/"
+    },
+    "Evidências - Chitãozinho & Xororó": {
+        "posicao": 11,
+        "nome": "Evidências",
+        "artista": "Chitãozinho & Xororó",
+        "url": "https://www.cifraclub.com.br/chitaozinho-e-xororo/evidencias/"
+    },
+    "Porque Ele Vive - 545 - Harpa Cristã": {
+        "posicao": 12,
+        "nome": "Porque Ele Vive - 545",
+        "artista": "Harpa Cristã",
+        "url": "https://www.cifraclub.com.br/harpa-crista/porque-ele-vive/"
+    },
+    "Em Teus Braços - Laura Souguellis": {
+        "posicao": 13,
+        "nome": "Em Teus Braços",
+        "artista": "Laura Souguellis",
+        "url": "https://www.cifraclub.com.br/laura-souguellis/em-teus-bracos/"
+    },
+    "Boate Azul - Bruno & Marrone": {
+        "posicao": 14,
+        "nome": "Boate Azul",
+        "artista": "Bruno & Marrone",
+        "url": "https://www.cifraclub.com.br/bruno-e-marrone/boate-azul/"
+    },
+    "Grande É o Senhor - Adhemar de Campos": {
+        "posicao": 15,
+        "nome": "Grande É o Senhor",
+        "artista": "Adhemar de Campos",
+        "url": "https://www.cifraclub.com.br/adhemar-de-campos/grande-o-senhor/"
+    },
+    "É Ele - Drops INA": {
+        "posicao": 16,
+        "nome": "É Ele",
+        "artista": "Drops INA",
+        "url": "https://www.cifraclub.com.br/drops-ina/e-ele/"
+    },
+    "Eu Te Seguro - Panda (Sertanejo)": {
+        "posicao": 17,
+        "nome": "Eu Te Seguro",
+        "artista": "Panda (Sertanejo)",
+        "url": "https://www.cifraclub.com.br/panda-cantor/eu-te-seguro/"
+    },
+    "Eu Navegarei - Gabriela Rocha": {
+        "posicao": 18,
+        "nome": "Eu Navegarei",
+        "artista": "Gabriela Rocha",
+        "url": "https://www.cifraclub.com.br/gabriela-rocha/eu-navegarei/"
+    },
+    "Gratidão - Florianópolis House Of Prayer (fhop music)": {
+        "posicao": 19,
+        "nome": "Gratidão",
+        "artista": "Florianópolis House Of Prayer (fhop music)",
+        "url": "https://www.cifraclub.com.br/florianopolis-house-of-prayer/gratidao/"
+    },
+    "Ousado Amor - Isaías Saad": {
+        "posicao": 20,
+        "nome": "Ousado Amor",
+        "artista": "Isaías Saad",
+        "url": "https://www.cifraclub.com.br/isaias-saad/ousado-amor/"
+    },
+    "Só Tu És Santo - MORADA": {
+        "posicao": 21,
+        "nome": "Só Tu És Santo",
+        "artista": "MORADA",
+        "url": "https://www.cifraclub.com.br/ministerio-morada/so-tu-s-santo/"
+    },
+    "O Escudo - Voz da Verdade": {
+        "posicao": 22,
+        "nome": "O Escudo",
+        "artista": "Voz da Verdade",
+        "url": "https://www.cifraclub.com.br/voz-da-verdade/o-escudo/"
+    },
+    "É Tudo Sobre Você - MORADA": {
+        "posicao": 23,
+        "nome": "É Tudo Sobre Você",
+        "artista": "MORADA",
+        "url": "https://www.cifraclub.com.br/ministerio-morada/e-tudo-sobre-voce/"
+    },
+    "Caso Indefinido - Cristiano Araújo": {
+        "posicao": 24,
+        "nome": "Caso Indefinido",
+        "artista": "Cristiano Araújo",
+        "url": "https://www.cifraclub.com.br/cristiano-araujo/caso-indefinido/"
+    },
+    "Flor e o Beija-flor (part. Marília Mendonça) - Henrique & Juliano": {
+        "posicao": 25,
+        "nome": "Flor e o Beija-flor (part. Marília Mendonça)",
+        "artista": "Henrique & Juliano",
+        "url": "https://www.cifraclub.com.br/henrique-e-juliano/flor-e-o-beija-flor/"
+    },
+    "Escape - Renascer Praise": {
+        "posicao": 26,
+        "nome": "Escape",
+        "artista": "Renascer Praise",
+        "url": "https://www.cifraclub.com.br/renascer-praise/escape/"
+    },
+    "Sinônimos - Zé Ramalho": {
+        "posicao": 27,
+        "nome": "Sinônimos",
+        "artista": "Zé Ramalho",
+        "url": "https://www.cifraclub.com.br/ze-ramalho/sinonimo/"
+    },
+    "Consagração - Aline Barros": {
+        "posicao": 28,
+        "nome": "Consagração",
+        "artista": "Aline Barros",
+        "url": "https://www.cifraclub.com.br/aline-barros/consagracao/"
+    },
+    "Eu Te Devoro - Djavan": {
+        "posicao": 29,
+        "nome": "Eu Te Devoro",
+        "artista": "Djavan",
+        "url": "https://www.cifraclub.com.br/djavan/eu-te-devoro/"
+    },
+    "Um Novo Dia - Get Worship": {
+        "posicao": 30,
+        "nome": "Um Novo Dia",
+        "artista": "Get Worship",
+        "url": "https://www.cifraclub.com.br/get-worship/um-novo-dia/"
+    },
+    "Só Os Loucos Sabem - Charlie Brown Jr.": {
+        "posicao": 31,
+        "nome": "Só Os Loucos Sabem",
+        "artista": "Charlie Brown Jr.",
+        "url": "https://www.cifraclub.com.br/charlie-brown-jr/so-os-loucos-sabem/"
+    },
+    "Emaús - MORADA": {
+        "posicao": 32,
+        "nome": "Emaús",
+        "artista": "MORADA",
+        "url": "https://www.cifraclub.com.br/ministerio-morada/emaus/"
+    },
+    "Eu Só Quero Adorar - Gerson Rufino": {
+        "posicao": 33,
+        "nome": "Eu Só Quero Adorar",
+        "artista": "Gerson Rufino",
+        "url": "https://www.cifraclub.com.br/gerson-rufino/eu-so-quero-adorar/"
+    },
+    "Vida Vazia - Bruno & Marrone": {
+        "posicao": 34,
+        "nome": "Vida Vazia",
+        "artista": "Bruno & Marrone",
+        "url": "https://www.cifraclub.com.br/bruno-e-marrone/vida-vazia/"
+    },
+    "Santo Pra Sempre - Gabriel Guedes": {
+        "posicao": 35,
+        "nome": "Santo Pra Sempre",
+        "artista": "Gabriel Guedes",
+        "url": "https://www.cifraclub.com.br/gabriel-guedes/santo-pra-sempre/"
+    },
+    "Coração Igual Ao Teu - Diante do Trono": {
+        "posicao": 36,
+        "nome": "Coração Igual Ao Teu",
+        "artista": "Diante do Trono",
+        "url": "https://www.cifraclub.com.br/diante-do-trono/coracao-igual-ao-teu/"
+    },
+    "Até Que o Senhor Venha - Ministério Zoe": {
+        "posicao": 37,
+        "nome": "Até Que o Senhor Venha",
+        "artista": "Ministério Zoe",
+        "url": "https://www.cifraclub.com.br/ministerio-zoe/ate-que-o-senhor-venha/"
+    },
+    "O Fogo Arderá - Alexsander Lúcio": {
+        "posicao": 38,
+        "nome": "O Fogo Arderá",
+        "artista": "Alexsander Lúcio",
+        "url": "https://www.cifraclub.com.br/alexsander-lucio/o-fogo-ardera/"
+    },
+    "Aquieta Minh'alma - Ministério Zoe": {
+        "posicao": 39,
+        "nome": "Aquieta Minh'alma",
+        "artista": "Ministério Zoe",
+        "url": "https://www.cifraclub.com.br/ministerio-zoe/aquieta-minh-alma/"
+    },
+    "O Que Sua Glória Fez Comigo - Fernanda Brum": {
+        "posicao": 40,
+        "nome": "O Que Sua Glória Fez Comigo",
+        "artista": "Fernanda Brum",
+        "url": "https://www.cifraclub.com.br/fernanda-brum/o-que-tua-gloria-fez-comigo/"
+    },
+    "Galileu - Fernandinho": {
+        "posicao": 41,
+        "nome": "Galileu",
+        "artista": "Fernandinho",
+        "url": "https://www.cifraclub.com.br/fernandinho/galileu/"
+    },
+    "Sonda-me, Usa-me - Aline Barros": {
+        "posicao": 42,
+        "nome": "Sonda-me, Usa-me",
+        "artista": "Aline Barros",
+        "url": "https://www.cifraclub.com.br/aline-barros/sonda-me-usa-me/"
+    },
+    "Bijuteria - Bruno & Marrone": {
+        "posicao": 43,
+        "nome": "Bijuteria",
+        "artista": "Bruno & Marrone",
+        "url": "https://www.cifraclub.com.br/bruno-e-marrone/bijuteria/"
+    },
+    "Jesus Em Tua Presença - MORADA": {
+        "posicao": 44,
+        "nome": "Jesus Em Tua Presença",
+        "artista": "MORADA",
+        "url": "https://www.cifraclub.com.br/ministerio-morada/jesus-em-tua-presenca/"
+    },
+    "Maranata - Ministério Avivah": {
+        "posicao": 45,
+        "nome": "Maranata",
+        "artista": "Ministério Avivah",
+        "url": "https://www.cifraclub.com.br/ministerio-avivah/maranata/"
+    },
+    "Primeira Essência - Aline Barros": {
+        "posicao": 46,
+        "nome": "Primeira Essência",
+        "artista": "Aline Barros",
+        "url": "https://www.cifraclub.com.br/aline-barros/primeira-essencia/"
+    },
+    "Deus de Obras Completas - Kemilly Santos": {
+        "posicao": 47,
+        "nome": "Deus de Obras Completas",
+        "artista": "Kemilly Santos",
+        "url": "https://www.cifraclub.com.br/kemilly-santos/deus-de-obras-completas/"
+    },
+    "Toda Terra - Gabriela Rocha": {
+        "posicao": 48,
+        "nome": "Toda Terra",
+        "artista": "Gabriela Rocha",
+        "url": "https://www.cifraclub.com.br/gabriela-rocha/toda-terra-ao-vivo/"
+    },
+    "Pra Não Pensar Em Você - Zezé Di Camargo & Luciano": {
+        "posicao": 49,
+        "nome": "Pra Não Pensar Em Você",
+        "artista": "Zezé Di Camargo & Luciano",
+        "url": "https://www.cifraclub.com.br/zeze-di-camargo-e-luciano/pra-nao-pensar-em-voce/"
+    },
+    "Tentei Te Esquecer - Matogrosso & Mathias": {
+        "posicao": 50,
+        "nome": "Tentei Te Esquecer",
+        "artista": "Matogrosso & Mathias",
+        "url": "https://www.cifraclub.com.br/matogrosso-e-mathias/tentei-te-esquecer/"
+    },
+    "Tubarões - Diego & Victor Hugo": {
+        "posicao": 51,
+        "nome": "Tubarões",
+        "artista": "Diego & Victor Hugo",
+        "url": "https://www.cifraclub.com.br/diego-victor-hugo/tubaroes/"
+    },
+    "Além do Rio Azul - Voz da Verdade": {
+        "posicao": 52,
+        "nome": "Além do Rio Azul",
+        "artista": "Voz da Verdade",
+        "url": "https://www.cifraclub.com.br/voz-da-verdade/alem-do-rio-azul/"
+    },
+    "Tua Graça Me Basta - Davi Sacer": {
+        "posicao": 53,
+        "nome": "Tua Graça Me Basta",
+        "artista": "Davi Sacer",
+        "url": "https://www.cifraclub.com.br/davi-sacer/tua-graca-me-basta/"
+    },
+    "A Ele a Glória - Diante do Trono": {
+        "posicao": 54,
+        "nome": "A Ele a Glória",
+        "artista": "Diante do Trono",
+        "url": "https://www.cifraclub.com.br/diante-do-trono/a-ele-gloria/"
+    },
+    "Amo Noite e Dia - Jorge & Mateus": {
+        "posicao": 55,
+        "nome": "Amo Noite e Dia",
+        "artista": "Jorge & Mateus",
+        "url": "https://www.cifraclub.com.br/jorge-mateus/amo-noite-dia/"
+    },
+    "Decida - Milionário & José Rico": {
+        "posicao": 56,
+        "nome": "Decida",
+        "artista": "Milionário & José Rico",
+        "url": "https://www.cifraclub.com.br/milionario-e-jose-rico/decida/"
+    },
+    "Uma Vez - Florianópolis House Of Prayer (fhop music)": {
+        "posicao": 57,
+        "nome": "Uma Vez",
+        "artista": "Florianópolis House Of Prayer (fhop music)",
+        "url": "https://www.cifraclub.com.br/florianopolis-house-of-prayer/uma-vez/"
+    },
+    "Santo Espírito - Laura Souguellis": {
+        "posicao": 58,
+        "nome": "Santo Espírito",
+        "artista": "Laura Souguellis",
+        "url": "https://www.cifraclub.com.br/laura-souguellis/santo-espirito/"
+    },
+    "Yeshua - José Jr.": {
+        "posicao": 59,
+        "nome": "Yeshua",
+        "artista": "José Jr.",
+        "url": "https://www.cifraclub.com.br/jose-augusto-five-music/yeshua/"
+    },
+    "A Casa É Sua - Casa Worship": {
+        "posicao": 60,
+        "nome": "A Casa É Sua",
+        "artista": "Casa Worship",
+        "url": "https://www.cifraclub.com.br/casa-worship/a-casa-e-sua/"
+    },
+    "Teu Amor Não Falha - Nívea Soares": {
+        "posicao": 61,
+        "nome": "Teu Amor Não Falha",
+        "artista": "Nívea Soares",
+        "url": "https://www.cifraclub.com.br/nivea-soares/teu-amor-nao-falha/"
+    },
+    "Peão Todo Tatuado (Part. Jeninho) - Mariana Fagundes": {
+        "posicao": 62,
+        "nome": "Peão Todo Tatuado (Part. Jeninho)",
+        "artista": "Mariana Fagundes",
+        "url": "https://www.cifraclub.com.br/mariana-fagundes/peao-todo-tatuado-part-jeninho/"
+    },
+    "Aquarela - Toquinho": {
+        "posicao": 63,
+        "nome": "Aquarela",
+        "artista": "Toquinho",
+        "url": "https://www.cifraclub.com.br/toquinho/aquarela/"
+    },
+    "Anjos - O Rappa": {
+        "posicao": 64,
+        "nome": "Anjos",
+        "artista": "O Rappa",
+        "url": "https://www.cifraclub.com.br/o-rappa/anjos/"
+    },
+    "Página de Amigos - Chitãozinho & Xororó": {
+        "posicao": 65,
+        "nome": "Página de Amigos",
+        "artista": "Chitãozinho & Xororó",
+        "url": "https://www.cifraclub.com.br/chitaozinho-e-xororo/pagina-de-amigos/"
+    },
+    "Um Amor Puro - Djavan": {
+        "posicao": 66,
+        "nome": "Um Amor Puro",
+        "artista": "Djavan",
+        "url": "https://www.cifraclub.com.br/djavan/um-amor-puro/"
+    },
+    "Eis-Me Aqui - Colo de Deus": {
+        "posicao": 67,
+        "nome": "Eis-Me Aqui",
+        "artista": "Colo de Deus",
+        "url": "https://www.cifraclub.com.br/comunidade-catolica-colo-de-deus/eis-me-aqui/"
+    },
+    "De Quem É a Culpa? - Marília Mendonça": {
+        "posicao": 68,
+        "nome": "De Quem É a Culpa?",
+        "artista": "Marília Mendonça",
+        "url": "https://www.cifraclub.com.br/marilia-mendonca/de-quem--a-culpa/"
+    },
+    "Acima do Sol - Skank": {
+        "posicao": 69,
+        "nome": "Acima do Sol",
+        "artista": "Skank",
+        "url": "https://www.cifraclub.com.br/skank/acima-do-sol/"
+    },
+    "Aclame Ao Senhor - Diante do Trono": {
+        "posicao": 70,
+        "nome": "Aclame Ao Senhor",
+        "artista": "Diante do Trono",
+        "url": "https://www.cifraclub.com.br/diante-do-trono/aclame-ao-senhor/"
+    },
+    "Creep - Radiohead": {
+        "posicao": 71,
+        "nome": "Creep",
+        "artista": "Radiohead",
+        "url": "https://www.cifraclub.com.br/radiohead/creep/"
+    },
+    "Alvo Mais Que a Neve - 39 - Harpa Cristã": {
+        "posicao": 72,
+        "nome": "Alvo Mais Que a Neve - 39",
+        "artista": "Harpa Cristã",
+        "url": "https://www.cifraclub.com.br/harpa-crista/alvo-mais-que-a-neve/"
+    },
+    "Don't Look Back In Anger - Oasis": {
+        "posicao": 73,
+        "nome": "Don't Look Back In Anger",
+        "artista": "Oasis",
+        "url": "https://www.cifraclub.com.br/oasis/dont-look-back-in-anger/"
+    },
+    "Por Onde Andei - Nando Reis": {
+        "posicao": 74,
+        "nome": "Por Onde Andei",
+        "artista": "Nando Reis",
+        "url": "https://www.cifraclub.com.br/nando-reis/por-onde-andei/"
+    },
+    "Sou Um Milagre - Voz da Verdade": {
+        "posicao": 75,
+        "nome": "Sou Um Milagre",
+        "artista": "Voz da Verdade",
+        "url": "https://www.cifraclub.com.br/voz-da-verdade/sou-um-milagre/"
+    },
+    "Sublime Renúncia - Leandro & Leonardo": {
+        "posicao": 76,
+        "nome": "Sublime Renúncia",
+        "artista": "Leandro & Leonardo",
+        "url": "https://www.cifraclub.com.br/leandro-e-leonardo/sublime-renuncia/"
+    },
+    "Jesus o Bom Amigo - 198 - Harpa Cristã": {
+        "posicao": 77,
+        "nome": "Jesus o Bom Amigo - 198",
+        "artista": "Harpa Cristã",
+        "url": "https://www.cifraclub.com.br/harpa-crista/jesus-bom-amigo-198/"
+    },
+    "O Nosso General É Cristo - Adhemar de Campos": {
+        "posicao": 78,
+        "nome": "O Nosso General É Cristo",
+        "artista": "Adhemar de Campos",
+        "url": "https://www.cifraclub.com.br/adhemar-de-campos/o-nosso-general-e-cristo/"
+    },
+    "Que Nem Maré - Jorge Vercillo": {
+        "posicao": 79,
+        "nome": "Que Nem Maré",
+        "artista": "Jorge Vercillo",
+        "url": "https://www.cifraclub.com.br/jorge-vercillo/que-nem-mare/"
+    },
+    "Lindo Momento - Julliany Souza": {
+        "posicao": 80,
+        "nome": "Lindo Momento",
+        "artista": "Julliany Souza",
+        "url": "https://www.cifraclub.com.br/julliany-souza/lindo-momento/"
+    },
+    "Digno É o Senhor (Worthy Is The Lamb) - Aline Barros": {
+        "posicao": 81,
+        "nome": "Digno É o Senhor (Worthy Is The Lamb)",
+        "artista": "Aline Barros",
+        "url": "https://www.cifraclub.com.br/aline-barros/digno-o-senhor--/"
+    },
+    "Dormi Na Praça - Bruno & Marrone": {
+        "posicao": 82,
+        "nome": "Dormi Na Praça",
+        "artista": "Bruno & Marrone",
+        "url": "https://www.cifraclub.com.br/bruno-e-marrone/dormi-na-praca/"
+    },
+    "Aleluia (Hallelujah) - Gabriela Rocha": {
+        "posicao": 83,
+        "nome": "Aleluia (Hallelujah)",
+        "artista": "Gabriela Rocha",
+        "url": "https://www.cifraclub.com.br/gabriela-rocha/aleluia-hallelujah/"
+    },
+    "Em Espírito, Em verdade - 647 - Harpa Cristã": {
+        "posicao": 84,
+        "nome": "Em Espírito, Em verdade - 647",
+        "artista": "Harpa Cristã",
+        "url": "https://www.cifraclub.com.br/harpa-crista/em-espirito-em-verdade/"
+    },
+    "Até Você Voltar - Henrique & Juliano": {
+        "posicao": 85,
+        "nome": "Até Você Voltar",
+        "artista": "Henrique & Juliano",
+        "url": "https://www.cifraclub.com.br/henrique-e-juliano/ate-voce-voltar/"
+    },
+    "Sozinho - Caetano Veloso": {
+        "posicao": 86,
+        "nome": "Sozinho",
+        "artista": "Caetano Veloso",
+        "url": "https://www.cifraclub.com.br/caetano-veloso/sozinho/"
+    },
+    "Acende Outra Vez - Jefferson & Suellen": {
+        "posicao": 87,
+        "nome": "Acende Outra Vez",
+        "artista": "Jefferson & Suellen",
+        "url": "https://www.cifraclub.com.br/jefferson-e-suellen/acende-outra-vez/"
+    },
+    "Dois Corações e Uma História - Zezé Di Camargo & Luciano": {
+        "posicao": 88,
+        "nome": "Dois Corações e Uma História",
+        "artista": "Zezé Di Camargo & Luciano",
+        "url": "https://www.cifraclub.com.br/zeze-di-camargo-e-luciano/dois-coracoes-e-uma-historia/"
+    },
+    "Imperfeito - Rayssa Andreoli": {
+        "posicao": 89,
+        "nome": "Imperfeito",
+        "artista": "Rayssa Andreoli",
+        "url": "https://www.cifraclub.com.br/rayssa-andreoli/imperfeito/"
+    },
+    "Eu e Minha Casa (part. Léo Brandão) - Julliany Souza": {
+        "posicao": 90,
+        "nome": "Eu e Minha Casa (part. Léo Brandão)",
+        "artista": "Julliany Souza",
+        "url": "https://www.cifraclub.com.br/julliany-souza/eu-e-minha-casa-part-leo-brandao/"
+    }
+}
