@@ -2,8 +2,8 @@ name: Analisador Diário de Músicas - Cifra Club
 
 on:
   schedule:
-    # Roda todos os dias às 11:00 UTC (08:00 no Horário de Brasília)
-    - cron: '0 11 * * *'
+    # Roda todos os dias às 13:00 UTC (10:00 no Horário de Brasília)
+    - cron: '0 13 * * *'
   workflow_dispatch: # Permite o botão de início manual
 
 jobs:
