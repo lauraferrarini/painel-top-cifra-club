@@ -21,7 +21,11 @@ REGIOES = {
 def extrair_musicas(url):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        # A API só aceita chamadas que informem esse Referer (é o que o
+        # front-end do próprio Cifra Club manda); sem ele, o servidor
+        # responde 401 Unauthorized mesmo sem exigir login de verdade.
+        'Referer': 'https://www.cifraclub.com.br/'
     }
     response = requests.get(url, headers=headers, timeout=20)
     response.raise_for_status()
