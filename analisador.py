@@ -1,114 +1,79 @@
 import requests
-from bs4 import BeautifulSoup
 import json
 import os
 import glob
 import sys
 import traceback
 from datetime import datetime
-from urllib.parse import urljoin
-from playwright.sync_api import sync_playwright
+from urllib.parse import urlparse
 
 # Configurações Gerais
 PASTA_DADOS = "historico_dados"
 PASTA_RELATORIOS = "historico_relatorios"
-MARGEM_OSCILACAO = 2 
+MARGEM_OSCILACAO = 2
 
-# Mapeamento do Cifra Club (Top Único)
+# Mapeamento de Regiões e endpoints da API do Cifra Club
 REGIOES = {
-    "cc": {"nome": "Cifra Club", "url": "https://www.cifraclub.com.br/mais-acessadas/", "cookies": {}}
+    "br": {"nome": "Brasil", "url": "https://api.cifraclub.com.br/v3/top/songs?limit=1000"},
+    "hispam": {"nome": "Hispam", "url": "https://api.cifraclub.com.br/v3/top/songs?lang=es&limit=1000"}
 }
 
-def extrair_musicas(url, cookies):
+def extrair_musicas(url):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        'Accept': 'application/json'
+    }
+    response = requests.get(url, headers=headers, timeout=20)
+    response.raise_for_status()
+
+    dados = response.json()
+    lista_songs = dados.get('songs', []) or []
     musicas_atuais = {}
-    
-    print("⏳ Abrindo navegador e carregando o Top 1000 do Cifra Club...")
-    
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        context = browser.new_context(
-            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            locale='pt-BR'
-        )
-        page = context.new_page()
-        page.goto(url, wait_until="domcontentloaded", timeout=60000)
-        
-        page.wait_for_selector("#js-sng_list", timeout=15000)
-        
-        # Loop inteligente para clicar no botão "Mostrar mais" até atingir 1000 músicas
-        tentativas_sem_mudanca = 0
-        while True:
-            qtd_atual = page.locator("#js-sng_list > li").count()
-            if qtd_atual >= 1000:
-                print(f"🎯 Meta atingida: {qtd_atual} músicas carregadas!")
-                break
-                
-            btn_mais = page.locator("#js-top_more")
-            if btn_mais.is_visible():
-                btn_mais.click()
-                try:
-                    # Aguarda a lista expandir além da quantidade anterior
-                    page.wait_for_function(
-                        f"document.querySelectorAll('#js-sng_list > li').length > {qtd_atual}",
-                        timeout=3000
-                    )
-                    tentativas_sem_mudanca = 0
-                except Exception:
-                    tentativas_sem_mudanca += 1
-                    if tentativas_sem_mudanca >= 3:
-                        print(f"ℹ️ Carregamento finalizado com {qtd_atual} itens na lista.")
-                        break
-            else:
-                print(f"ℹ️ Botão 'Mostrar mais' não visível. Total carregado: {qtd_atual}")
-                break
 
-        html_completo = page.content()
-        browser.close()
+    for rank, item in enumerate(lista_songs, start=1):
+        nome = (item.get('name') or "Desconhecido").strip()
+        artista_obj = item.get('artist') or {}
+        artista = (artista_obj.get('name') or "Desconhecido").strip()
 
-    soup = BeautifulSoup(html_completo, 'html.parser')
-    lista_top = soup.find('ol', id='js-sng_list') or soup.find('ol', class_=lambda c: c and 'top' in c)
-    
-    if not lista_top:
-        return musicas_atuais
-        
-    itens = lista_top.find_all('li')
-    rank = 1
-    for item in itens:
-        tag_a = item.find('a')
-        tag_nome = item.find(class_='top-txt_primary__verified') or item.find(['strong', 'b'])
-        tag_artista = item.find(class_='top-txt_secondary')
-        
-        if not tag_nome or not tag_artista:
-            continue
-            
-        nome = tag_nome.text.strip()
-        artista = tag_artista.text.strip()
-        
-        if not nome or not artista:
-            continue
-        
-        href = tag_a['href'] if tag_a and tag_a.has_attr('href') else ""
-        link_absoluto = urljoin(url, href) if href else ""
-        
-        chave = f"{nome} - {artista}"
+        # Monta a URL absoluta da música juntando o slug do artista com o
+        # slug da música (é assim que o Cifra Club estrutura os links).
+        artista_slug = artista_obj.get('url') or ""
+        musica_slug = item.get('url') or ""
+        link_absoluto = f"https://www.cifraclub.com.br/{artista_slug}/{musica_slug}/" if (artista_slug and musica_slug) else ""
+
+        # ⚡ ID ESTÁVEL: a API do Cifra Club já entrega um id numérico único e
+        # permanente por música (item['id']), então ele é usado direto como
+        # chave — o mesmo id aparece tanto no top do Brasil quanto no top do
+        # Hispam pra mesma música, o que é o que permite o cruzamento entre
+        # regiões ("Também aparece em") no index.html encontrar a outra
+        # região, sem nenhuma lógica extra de casamento por caminho/texto
+        # (diferente do robô antigo, que precisava disso porque fazia
+        # scraping de HTML sem id estável). Só cai pro caminho da URL, e por
+        # último pro formato antigo (Nome - Artista), se a API vier sem id.
+        song_id = item.get('id')
+        if song_id is not None:
+            chave = str(song_id)
+        elif link_absoluto:
+            chave = urlparse(link_absoluto).path
+        else:
+            chave = f"{nome} - {artista}"
+
         musicas_atuais[chave] = {
             "posicao": rank,
             "nome": nome,
             "artista": artista,
             "url": link_absoluto
         }
-        rank += 1
-            
-    print(f"✅ Sucesso: {len(musicas_atuais)} músicas extraídas com precisão!")
+
     return musicas_atuais
 
 def buscar_dados_anteriores(regiao):
     data_hoje_iso = datetime.now().strftime("%Y-%m-%d")
     pasta_regiao = os.path.join(PASTA_DADOS, regiao)
-    
+
     if os.path.exists(pasta_regiao):
         arquivos = sorted([
-            f for f in os.listdir(pasta_regiao) 
+            f for f in os.listdir(pasta_regiao)
             if f.endswith('.json') and f != f"dados_{data_hoje_iso}.json"
         ])
         if arquivos:
@@ -122,53 +87,63 @@ def atualizar_dados_dashboard(regiao):
     arquivos = sorted(glob.glob(os.path.join(pasta_regiao, "dados_*.json")))
     historico_global = {}
     todas_datas = []
-    
+
     for arq in arquivos:
         nome_base = os.path.basename(arq)
         data_str = nome_base.replace("dados_", "").replace(".json", "")
         todas_datas.append(data_str)
-        
+
         with open(arq, 'r', encoding='utf-8') as f:
             dados_dia = json.load(f)
-            
+
+        # A chave do dia já é o id estável da música (vindo direto da API),
+        # então ela mesma é a "bucket" definitiva dentro de historico_global
+        # — sem precisar da lógica de casamento por caminho/texto que o robô
+        # antigo usava pra compensar o scraping de HTML sem id.
         for chave, info in dados_dia.items():
             if chave not in historico_global:
                 historico_global[chave] = {}
-            if "url" in info and "url" not in historico_global[chave]:
+
+            if info.get("url"):
                 historico_global[chave]["url"] = info["url"]
+            if info.get("nome"):
+                historico_global[chave]["nome"] = info["nome"]
+            if info.get("artista"):
+                historico_global[chave]["artista"] = info["artista"]
+
             historico_global[chave][data_str] = info["posicao"]
-            
+
     dados_finais = {
         "datas": todas_datas,
         "musicas": historico_global
     }
-    
+
     with open(f"dados_dashboard_{regiao}.json", "w", encoding="utf-8") as f:
         json.dump(dados_finais, f, ensure_ascii=False, indent=4)
 
 def processar_regiao(regiao, config):
-    print(f"🌍 Coletando dados: {config['nome']} ({regiao})...")
-    
+    print(f"🎸 Coletando dados da região: {config['nome']} ({regiao})...")
+
     pasta_dados_regiao = os.path.join(PASTA_DADOS, regiao)
     pasta_relatorios_regiao = os.path.join(PASTA_RELATORIOS, regiao)
     os.makedirs(pasta_dados_regiao, exist_ok=True)
     os.makedirs(pasta_relatorios_regiao, exist_ok=True)
-    
-    atuais = extrair_musicas(config['url'], config['cookies'])
+
+    atuais = extrair_musicas(config['url'])
     if not atuais:
-        print(f"⚠️ Alerta: Nenhuma música coletada para {config['nome']}. Estrutura mudou ou bloqueio.")
+        print(f"⚠️ Alerta: Nenhuma música coletada para {config['nome']}. API mudou ou bloqueio.")
         return False
-        
+
     anteriores = buscar_dados_anteriores(regiao)
-    
+
     data_hoje_iso = datetime.now().strftime("%Y-%m-%d")
     data_hoje_br = datetime.now().strftime("%d/%m/%Y")
 
     novas_entradas = []
-    subidas_absurdas = []   
-    grandes_saltos = []     
-    subidas_moderadas = []  
-    pequenas_subidas = []   
+    subidas_absurdas = []
+    grandes_saltos = []
+    subidas_moderadas = []
+    pequenas_subidas = []
 
     if not anteriores:
         conteudo_md = f"# 📊 Relatório Cifra Club - {config['nome']} - {data_hoje_br}\n\n"
@@ -181,13 +156,14 @@ def processar_regiao(regiao, config):
     else:
         for chave, dados_atuais in atuais.items():
             pos_atual = dados_atuais['posicao']
-            
-            if chave not in anteriores:
+            info_anterior = anteriores.get(chave)
+
+            if info_anterior is None:
                 novas_entradas.append(dados_atuais)
             else:
-                pos_anterior = anteriores[chave]['posicao']
-                diferenca = pos_anterior - pos_atual 
-                
+                pos_anterior = info_anterior['posicao']
+                diferenca = pos_anterior - pos_atual
+
                 dados_item = {
                     "dados": dados_atuais,
                     "pos_anterior": pos_anterior,
@@ -210,13 +186,13 @@ def processar_regiao(regiao, config):
         pequenas_subidas.sort(key=lambda x: x['posicoes_ganhas'], reverse=True)
 
         conteudo_md = f"# 📊 Relatório Cifra Club - {config['nome']} - {data_hoje_br}\n\n"
-        
+
         if subidas_absurdas:
             conteudo_md += "## 🚨 🚨 EXPLOSÃO NO TOP: SUBIDAS ABSURDAS (+400 posições) 🚨 🚨\n"
             for m in subidas_absurdas:
                 conteudo_md += f"> ### 💥 **{m['dados']['nome']}** — *{m['dados']['artista']}*\n"
                 conteudo_md += f"> 🛑 **Subida histórica!** Saltou de {m['pos_anterior']}º direto para **{m['pos_atual']}º** (🔼 **+{m['posicoes_ganhas']}** posições)\n\n"
-        
+
         conteudo_md += "## 🔥 Grandes Saltos (+200 a 400 posições)\n"
         if grandes_saltos:
             for m in grandes_saltos:
@@ -246,38 +222,54 @@ def processar_regiao(regiao, config):
         else:
             conteudo_md += "- Nenhuma música inédita detectada hoje.\n"
 
+    # Salva os relatórios específicos da região
     with open(os.path.join(pasta_relatorios_regiao, f"relatorio_{data_hoje_iso}.md"), 'w', encoding='utf-8') as f:
         f.write(conteudo_md)
-        
+
+    # Relatório raiz específico da região (ex: relatorio_diario_hispam.md)
     with open(f"relatorio_diario_{regiao}.md", 'w', encoding='utf-8') as f:
         f.write(conteudo_md)
-        
+
+    # Salva o JSON na subpasta correspondente
     with open(os.path.join(pasta_dados_regiao, f"dados_{data_hoje_iso}.json"), 'w', encoding='utf-8') as f:
         json.dump(atuais, f, ensure_ascii=False, indent=4)
-        
+
     return True
 
 if __name__ == "__main__":
     try:
+        # Define o alvo baseado no argumento do terminal (ex: "br", "hispam", ou "all")
+        alvo = sys.argv[1].lower() if len(sys.argv) > 1 else "all"
+
+        if alvo == "br":
+            regioes_para_processar = ["br"]
+        elif alvo == "hispam":
+            regioes_para_processar = ["hispam"]
+        else:
+            regioes_para_processar = list(REGIOES.keys())
+
+        print(f"🚀 Iniciando módulo de análise para o alvo: {alvo.upper()}")
+
         sucesso_geral = True
-        for regiao, config in REGIOES.items():
+        for regiao in regioes_para_processar:
+            config = REGIOES[regiao]
             try:
                 if processar_regiao(regiao, config):
                     atualizar_dados_dashboard(regiao)
-                    print(f"✅ Fonte {regiao.upper()} processada com sucesso.\n")
+                    print(f"✅ Região {regiao.upper()} processada com sucesso.\n")
                 else:
                     sucesso_geral = False
             except Exception as e:
-                print(f"\n💥 Erro ao processar {regiao.upper()}:")
+                print(f"\n💥 Erro ao processar a região {regiao.upper()}:")
                 traceback.print_exc()
                 sucesso_geral = False
-        
+
         if sucesso_geral:
-            print("🚀 Módulo executado com sucesso total!")
+            print(f"🚀 Módulo executado com sucesso total para as regiões ({alvo.upper()})!")
         else:
-            print("⚠️ Execução concluída com falhas parciais.")
+            print("⚠️ Execução concluída com falhas parciais em algumas regiões.")
             sys.exit(1)
-            
+
     except Exception as e:
         print("\n💥 --- ERRO CRÍTICO INESPERADO NO SCRIPT --- 💥")
         traceback.print_exc()

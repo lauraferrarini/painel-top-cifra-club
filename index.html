@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Evolução Musical - Cifra Club</title>
+    <title>Painel de Evolução Musical — Cifra Club</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -33,6 +33,26 @@
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             box-sizing: border-box;
+        }
+
+        /* MENU SUPERIOR DE REGIÕES */
+        .nav-menu {
+            font-size: 11px;
+            margin-bottom: 20px;
+            color: var(--border-light);
+            font-weight: 500;
+        }
+        .nav-item {
+            cursor: pointer;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+            padding: 0 4px;
+        }
+        .nav-item:hover { color: #000; }
+        .nav-item.active-region {
+            font-weight: 800;
+            color: var(--text-main);
         }
 
         header h1 { font-size: 22px; margin: 0 0 5px 0; font-weight: 700; }
@@ -232,9 +252,14 @@
 <div class="container">
     <div id="error-banner"></div>
 
+    <div class="nav-menu">
+        <span class="nav-item active-region" id="nav-br" onclick="carregarDados('br')">Brasil</span> |
+        <span class="nav-item" id="nav-hispam" onclick="carregarDados('hispam')">Hispam</span>
+    </div>
+
     <header>
-        <h1 id="report-date">Relatório Diário Top 1000 Cifra Club</h1>
-        <p class="subtitle">Acompanhamento contínuo do ranking e comportamento histórico das faixas. Atualiza diariamente às 10h30 BRT.</p>
+        <h1 id="report-date">Relatório Diário Top 1000 BR</h1>
+        <p class="subtitle">Acompanhamento contínuo do ranking e comportamento histórico das faixas no Cifra Club. Atualiza diariamente às 9h BRT (Brasil) e às 11h30 (Hispam).</p>
     </header>
 
     <div class="kpi-container" id="kpi-wrapper">
@@ -313,18 +338,23 @@
     let chartInstance = null;
     let faixaSelecionadaAtualmente = null;
     let diasFiltroAtivo = 0; 
-    let regiaoAtiva = 'cc';
+    let regiaoAtiva = 'br';
     const categoriesLista = ['absurda', 'grandes', 'moderadas', 'pequenas', 'novas'];
 
     const nomesRegioes = {
-        'cc': 'Cifra Club'
+        'br': 'Brasil',
+        'hispam': 'Hispam'
     };
 
     if (!window.todosDadosRegioes) window.todosDadosRegioes = {};
-    const listaRegioes = ['cc'];
+    const listaRegioes = ['br', 'hispam'];
 
     function carregarDados(regiao) {
         regiaoAtiva = regiao;
+        
+        document.querySelectorAll('.nav-menu .nav-item').forEach(el => el.classList.remove('active-region'));
+        const navEl = document.getElementById(`nav-${regiao}`);
+        if (navEl) navEl.classList.add('active-region');
 
         if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
         faixaSelecionadaAtualmente = null;
@@ -347,7 +377,7 @@
         document.getElementById('chk-todas').checked = true;
         categoriesLista.forEach(cat => document.getElementById(`chk-${cat}`).checked = false);
 
-        // Reseta o seletor de fim de semana para o estado padrão ativado
+        // Reseta o seletor de fim de semana para o estado padrão ativado ao alternar regiões
         document.getElementById('chk-fds').checked = true;
 
         diasFiltroAtivo = 0;
@@ -402,16 +432,18 @@
             }
         }
 
-        document.getElementById('report-date').innerText = `Relatório Diário Top 1000 Cifra Club — ${hoje.split('-').reverse().join('/')}`;
+        document.getElementById('report-date').innerText = `Relatório Diário Top 1000 ${nomesRegioes[regiaoAtiva]} — ${hoje.split('-').reverse().join('/')}`;
 
         let listaGeral = [];
         let cAbsurda = 0, cGrandes = 0, cModeradas = 0, cNovas = 0;
 
-        Object.entries(dadosGlobais.musicas).forEach(([nomeChave, historico]) => {
-            if (!historico[hoje]) return; 
+        Object.entries(dadosGlobais.musicas).forEach(([chaveId, historico]) => {
+            if (!historico[hoje]) return;
 
             let posAtual = historico[hoje];
-            let item = { nome: nomeChave, atual: posAtual, estado: 'normal', emojiHTML: '', url: historico.url || '#' };
+            // ⚡ ID ESTÁVEL: a chave do objeto agora é o link da música (não muda),
+            // então nome/artista são lidos dos campos guardados no histórico.
+            let item = { id: chaveId, nome: historico.nome || chaveId, artista: historico.artista || '', atual: posAtual, estado: 'normal', emojiHTML: '', url: historico.url || '#' };
 
             // ⚡ COMPORTAMENTO DE DUAS TAGS CORRIGIDO: Omitida a tag de pequenas subidas (<100) para novidades
             if (!ontem || !historico[ontem]) {
@@ -450,30 +482,27 @@
         tbody.innerHTML = '';
 
         listaGeral.forEach(item => {
-            let nomeEscapado = item.nome.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-            
-            let lastHyphenIdx = item.nome.lastIndexOf("-");
-            let tituloMusica = "Desconhecido";
-            let artistaMusica = "Desconhecido";
+            let tituloMusica = item.nome || "Desconhecido";
+            let artistaMusica = item.artista || "Desconhecido";
 
-            if (lastHyphenIdx !== -1) {
-                tituloMusica = item.nome.substring(0, lastHyphenIdx).trim();
-                artistaMusica = item.nome.substring(lastHyphenIdx + 1).trim();
-                
-                if (tituloMusica.endsWith(" -")) {
-                    tituloMusica = tituloMusica.substring(0, tituloMusica.length - 2).trim();
+            // Fallback para entradas antigas do dashboard que ainda não têm nome/artista
+            // separados (geradas antes do id passar a ser o link) — só nesse caso a gente
+            // ainda precisa quebrar pelo " - " (hífen com espaço nos dois lados).
+            if (!item.artista) {
+                let lastHyphenIdx = tituloMusica.lastIndexOf(" - ");
+                if (lastHyphenIdx !== -1) {
+                    artistaMusica = tituloMusica.substring(lastHyphenIdx + 3).trim();
+                    tituloMusica = tituloMusica.substring(0, lastHyphenIdx).trim();
                 }
-            } else {
-                tituloMusica = item.nome;
             }
 
             let tr = document.createElement('tr');
             tr.className = "clickable-row";
             tr.setAttribute('data-categoria', item.estado);
-            tr.setAttribute('data-fullname', item.nome);
-            
-            tr.onclick = function(e) { 
-                selecionarFaixa(item.nome, this); 
+            tr.setAttribute('data-fullname', item.id);
+
+            tr.onclick = function(e) {
+                selecionarFaixa(item.id, this);
                 if (e.target.tagName === 'TD' || e.target.tagName === 'TR') {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
@@ -484,7 +513,7 @@
                 : `<span>${tituloMusica}</span>`;
 
             // ⚡ AJUSTE DE ALINHAMENTO: Modificado para float: right para mandar o jornalzinho pro extremo direito da célula
-            let newsSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(item.nome)}&tbm=nws`;
+            let newsSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(tituloMusica + ' ' + artistaMusica)}&tbm=nws`;
             let newsIconHTML = ` <a href="${newsSearchUrl}" target="_blank" title="Pesquisar notícias" onclick="event.stopPropagation();" style="text-decoration: none; float: right;">📰</a>`;
 
             tr.innerHTML = `
@@ -516,22 +545,29 @@
                 return;
             }
 
-            let chavesGlobais = Object.keys(dadosGlobais.musicas);
-            let filtradas = chavesGlobais.filter(m => m.toLowerCase().includes(valorInput));
+            // ⚡ ID ESTÁVEL: a chave agora é o link, então o texto buscável/exibido vem
+            // de nome/artista guardados no histórico (com fallback pro id só se faltarem).
+            let entradasGlobais = Object.entries(dadosGlobais.musicas).map(([id, historico]) => {
+                let nome = historico.nome || id;
+                let artista = historico.artista || '';
+                let label = artista ? `${nome} - ${artista}` : nome;
+                return { id, label };
+            });
+            let filtradas = entradasGlobais.filter(e => e.label.toLowerCase().includes(valorInput));
 
             if (filtradas.length > 0) {
                 containerMatches.style.display = 'block';
-                filtradas.slice(0, 30).forEach(faixaNome => {
+                filtradas.slice(0, 30).forEach(entrada => {
                     let itemDiv = document.createElement('div');
                     itemDiv.className = 'search-match-item';
-                    itemDiv.innerText = faixaNome;
-                    
+                    itemDiv.innerText = entrada.label;
+
                     itemDiv.onclick = function() {
-                        inputBusca.value = faixaNome;
+                        inputBusca.value = entrada.label;
                         containerMatches.style.display = 'none';
-                        
-                        let seletorLinha = document.querySelector(`#tbody-corrido .clickable-row[data-fullname="${faixaNome.replace(/"/g, '\\"')}"]`);
-                        selecionarFaixa(faixaNome, seletorLinha);
+
+                        let seletorLinha = document.querySelector(`#tbody-corrido .clickable-row[data-fullname="${entrada.id.replace(/"/g, '\\"')}"]`);
+                        selecionarFaixa(entrada.id, seletorLinha);
                     };
                     containerMatches.appendChild(itemDiv);
                 });
@@ -588,10 +624,10 @@
         });
     }
 
-    function selecionarFaixa(nomeMusica, elementoLinha) {
-        faixaSelecionadaAtualmente = nomeMusica;
+    function selecionarFaixa(idMusica, elementoLinha) {
+        faixaSelecionadaAtualmente = idMusica;
         document.querySelectorAll('.clickable-row').forEach(el => el.classList.remove('active-track'));
-        
+
         if(elementoLinha) {
             elementoLinha.classList.add('active-track');
         }
@@ -599,14 +635,22 @@
         document.getElementById('msg-inicial').style.display = 'none';
         document.getElementById('menu-periodo').style.display = 'block';
         document.getElementById('historicoChart').style.display = 'block';
-        
+
         const trackData = dadosGlobais.musicas[faixaSelecionadaAtualmente];
         const trackUrl = trackData ? (trackData.url || '#') : '#';
-        
-        let lastHyphenIdx = faixaSelecionadaAtualmente.lastIndexOf("-");
-        let tituloClean = lastHyphenIdx !== -1 ? faixaSelecionadaAtualmente.substring(0, lastHyphenIdx).trim() : faixaSelecionadaAtualmente;
-        if (tituloClean.endsWith(" -")) tituloClean = tituloClean.substring(0, tituloClean.length - 2).trim();
-        let artistaClean = lastHyphenIdx !== -1 ? faixaSelecionadaAtualmente.substring(lastHyphenIdx + 1).trim() : "Desconhecido";
+
+        // ⚡ ID ESTÁVEL: nome/artista vêm do histórico salvo; só cai no split por
+        // " - " se for uma entrada antiga do dashboard sem esses campos.
+        let tituloClean = (trackData && trackData.nome) ? trackData.nome : faixaSelecionadaAtualmente;
+        let artistaClean = (trackData && trackData.artista) ? trackData.artista : "Desconhecido";
+
+        if (trackData && !trackData.artista) {
+            let lastHyphenIdx = tituloClean.lastIndexOf(" - ");
+            if (lastHyphenIdx !== -1) {
+                artistaClean = tituloClean.substring(lastHyphenIdx + 3).trim();
+                tituloClean = tituloClean.substring(0, lastHyphenIdx).trim();
+            }
+        }
 
         let dynamicLinkHTML = (trackUrl && trackUrl !== '#')
             ? `<a href="${trackUrl}" target="_blank" class="track-hyperlink">${tituloClean}</a>`
@@ -616,7 +660,89 @@
         titleBox.style.display = 'block';
         titleBox.innerHTML = `${dynamicLinkHTML} <span style="color: var(--text-muted); font-size: 11px; font-weight: 500;">— ${artistaClean}</span>`;
 
+        // ⚡ ENGENHARIA DE VERIFICAÇÃO CRUZADA COM INJEÇÃO DE STATUS REGIONAIS EM TEMPO REAL
+        let presencias = [];
+        listaRegioes.forEach(r => {
+            if (r === regiaoAtiva) return; 
+            const dataRegiao = window.todosDadosRegioes[r];
+            if (dataRegiao && dataRegiao.musicas && dataRegiao.musicas[faixaSelecionadaAtualmente]) {
+                const datasObj = dataRegiao.datas;
+                const ultimaData = datasObj[datasObj.length - 1]; 
+                const pos = dataRegiao.musicas[faixaSelecionadaAtualmente][ultimaData];
+                
+                if (pos) {
+                    let ontemRegiao = datasObj.length > 1 ? datasObj[datasObj.length - 2] : null;
+
+                    const considerarFds = document.getElementById('chk-fds').checked;
+                    if (!considerarFds && ultimaData) {
+                        const partesHoje = ultimaData.split('-');
+                        const dataHojeObj = new Date(partesHoje[0], partesHoje[1] - 1, partesHoje[2]);
+                        if (dataHojeObj.getDay() === 1) {
+                            for (let idx = datasObj.length - 2; idx >= 0; idx--) {
+                                const dStr = datasObj[idx];
+                                const p = dStr.split('-');
+                                const dCheck = new Date(p[0], p[1] - 1, p[2]);
+                                if (dCheck.getDay() === 5) {
+                                    ontemRegiao = dStr;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    let emojiRegiao = '';
+                    if (!ontemRegiao || !dataRegiao.musicas[faixaSelecionadaAtualmente][ontemRegiao]) {
+                        emojiRegiao = ' 🚀';
+                    } else {
+                        let posAnteriorRegiao = dataRegiao.musicas[faixaSelecionadaAtualmente][ontemRegiao];
+                        let ganhoRegiao = posAnteriorRegiao - pos;
+                        if (ganhoRegiao > 0) {
+                            if (ganhoRegiao > 400) emojiRegiao = ' 🚨';
+                            else if (ganhoRegiao > 200) emojiRegiao = ' 🔥';
+                            else if (ganhoRegiao >= 100) emojiRegiao = ' 📈';
+                            else if (ganhoRegiao > 2) emojiRegiao = ' 🌱';
+                        }
+                    }
+
+                    presencias.push({ regiao: r, nome: nomesRegioes[r], posicao: pos, emoji: emojiRegiao });
+                }
+            }
+        });
+
+        const crossEl = document.getElementById('cross-region-presence');
+        if (presencias.length > 0) {
+            crossEl.style.display = 'block';
+            let links = presencias.map(p => {
+                let mscEscapada = faixaSelecionadaAtualmente.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                return `<a href="#" class="track-hyperlink" onclick="event.preventDefault(); alternarParaRegiaoETrack('${p.regiao}', '${mscEscapada}')">${p.nome} (${p.posicao}º${p.emoji})</a>`;
+            }).join(', ');
+            crossEl.innerHTML = `Também aparece em: ${links}`;
+        } else {
+            crossEl.style.display = 'none';
+            crossEl.innerHTML = '';
+        }
+
         gerarGrafico();
+    }
+
+    function alternarParaRegiaoETrack(novaRegiao, idMusica) {
+        regiaoAtiva = novaRegiao;
+
+        document.querySelectorAll('.nav-menu .nav-item').forEach(el => el.classList.remove('active-region'));
+        const navEl = document.getElementById(`nav-${novaRegiao}`);
+        if (navEl) navEl.classList.add('active-region');
+
+        document.querySelectorAll('.persistent-tooltip').forEach(el => el.remove());
+        const svgOverlay = document.getElementById('popups-svg-overlay');
+        if (svgOverlay) svgOverlay.innerHTML = '';
+
+        dadosGlobais = window.todosDadosRegioes[novaRegiao];
+        processarEMontarTabelaCorrida();
+
+        faixaSelecionadaAtualmente = idMusica;
+        let seletorLinha = document.querySelector(`#tbody-corrido .clickable-row[data-fullname="${idMusica.replace(/"/g, '\\"')}"]`);
+
+        selecionarFaixa(idMusica, seletorLinha);
     }
 
     function criarPopupPersistente(date, position, x, y) {
@@ -802,7 +928,7 @@
         });
     }
 
-    carregarDados('cc');
+    carregarDados('br');
 </script>
 </body>
 </html>
